@@ -1,4 +1,6 @@
 """Version-separated plugin state; retain the existing KiCad 9 locations."""
+from __future__ import annotations
+
 from pathlib import Path
 import os
 import sys
