@@ -19,7 +19,8 @@ env:
   AUTHOR_WEB: https://github.com/nguyen-v/kicad_library_manager
   LICENSE: GPL-3.0
   KICAD_MIN: "9.0"
-  STATUS: stable
+  KICAD_MAX: "10.99"
+  STATUS: testing
   RUNTIME: ipc
 
   # Change this later to your icon path
@@ -83,6 +84,7 @@ jobs:
             "version": ver,
             "status": os.environ.get("STATUS","stable"),
             "kicad_version": os.environ.get("KICAD_MIN","9.0"),
+            "kicad_version_max": os.environ.get("KICAD_MAX","10.99"),
             "runtime": os.environ.get("RUNTIME","ipc"),
             "platforms": ["windows", "macos", "linux"]
           }]
@@ -139,6 +141,7 @@ jobs:
             --author_web "${AUTHOR_WEB}" \
             --license "${LICENSE}" \
             --kicad_min "${KICAD_MIN}" \
+            --kicad_max "${KICAD_MAX}" \
             --status "${STATUS}" \
             --runtime "${RUNTIME}" \
             --icon_src "${ICON_SRC}" \

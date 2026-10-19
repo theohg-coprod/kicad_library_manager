@@ -7,9 +7,15 @@ An IPC plugin for KiCad for managing local database (sqlite libraries) across ma
 - browse/edit parts and browse symbols/footprints with previews
 - initialize a brand-new database repo with the required CI scaffolding
 
-**Requirements:** KiCad 9.0+ (PCB Editor), with the **KiCad API** enabled.
+**Requirements:** KiCad 9 or 10 (PCB Editor), with the **KiCad API** enabled.
 
 This is an **IPC** plugin (`plugin.json`), not a legacy SWIG action plugin. It only appears in the **PCB Editor** toolbar / **Tools → External Plugins**.
+
+For this development branch, use the [Mac trial setup](https://github.com/coprod-LLC/kicad_project_manager/blob/port/kicad10/docs/port-mac.md)
+to clone all five port branches and create the plugin symlinks automatically.
+The source baseline is **1.3.10**; no new release is published. KiCad 10 settings,
+cache and instance lock use a separate `10.0` subfolder, preserving KiCad 9 state.
+Previews can use KiCad's bundled `wx.svg` without an external SVG converter.
 
 ---
 
@@ -25,7 +31,7 @@ This is an **IPC** plugin (`plugin.json`), not a legacy SWIG action plugin. It o
 
 **Linux (Debian/Ubuntu) — one-time host packages**
 
-KiCad’s IPC plugin venv needs `pip`/`venv`/`wx`, previews need `rsvg-convert`, and KiCad DBL needs the SQLite ODBC driver. Install everything with:
+KiCad’s IPC plugin venv needs `pip`/`venv`/`wx`, previews use bundled `wx.svg` or `rsvg-convert`, and KiCad DBL needs the SQLite ODBC driver. Install everything with:
 
 ```bash
 sudo ./scripts/setup_linux.sh
@@ -321,3 +327,27 @@ Install Inkscape and ensure `inkscape` is available on `PATH`, then restart KiCa
 - **Blue**: remote applied your request; sync needed
 - **Red**: remote out-of-date vs your local
 - **Gray**: unknown/stale (needs Fetch remote)
+
+### KiCad 10 port (based on 1.3.10; unreleased)
+
+This development branch includes release `v1.3.10` and the Unicode asset-status
+fix. Its internal version matches the released baseline; a new release version
+will be chosen when publishing a release. The initial local `0.8.0` plugin label
+was incorrect. `kicad-python==0.8.0` below is the separate Python API dependency.
+
+- Uses the existing IPC API, pinned to `kicad-python==0.8.0`; no SWIG dependency.
+- Selects the launching editor's config and matching CLI, follows nested library
+  tables, and indexes packed or unpacked symbol libraries (including stock 10 symbols).
+- Preview metadata workers now accept successful subprocess results correctly.
+- Keep separate `XDG_CONFIG_HOME`, `XDG_CACHE_HOME`, `KICAD_CONFIG_HOME` and
+  `KICAD_DOCUMENTS_HOME` for a parallel trial installation. `KICAD_CLI` may point
+  to a matching-version wrapper. Do not point the trial at a production library checkout.
+- The examples above use 9.0; substitute 10.0 for a native KiCad 10 installation.
+  For AppImage, choose its bundled Python in KiCad's API settings, including the
+  matching wxPython. Repair accepts `--major 10 --python /path/to/python3.11
+  --skip-system-deps`; it respects `XDG_CACHE_HOME`.
+- Linux 9.0.9 and 10.0.7 discovery, metadata and company/stock SVG/raster previews
+  pass in isolated profiles. Windows/macOS and full request/DBL editor flows remain
+  qualification tasks. PCM compatibility is capped at 10.99 until 11 is tested.
+
+Run `python3 -m unittest discover -s tests` for discovery/version regressions.
