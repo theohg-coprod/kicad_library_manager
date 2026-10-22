@@ -11,11 +11,10 @@ An IPC plugin for KiCad for managing local database (sqlite libraries) across ma
 
 This is an **IPC** plugin (`plugin.json`), not a legacy SWIG action plugin. It only appears in the **PCB Editor** toolbar / **Tools → External Plugins**.
 
-For this development branch, use the [Mac trial setup](https://github.com/coprod-LLC/kicad_project_manager/blob/port/kicad10/docs/port-mac.md)
-to clone all five port branches and create the plugin symlinks automatically.
-The source baseline is **1.3.10**; no new release is published. KiCad 10 settings,
-cache and instance lock use a separate `10.0` subfolder, preserving KiCad 9 state.
-Previews can use KiCad's bundled `wx.svg` without an external SVG converter.
+KiCad 10 settings, cache and instance lock use a separate `10.0` subfolder;
+KiCad 9 keeps its existing locations. Previews can use KiCad's bundled `wx.svg`
+without an external SVG converter. For an unreleased checkout, use manual
+installation below; PCM installs the latest tagged release.
 
 ---
 
@@ -27,7 +26,8 @@ Previews can use KiCad's bundled `wx.svg` without an external SVG converter.
 
 1. Open KiCad → **Preferences → Plugins**
 2. Enable **Enable KiCad API** (API server)
-3. On Linux, set the Python interpreter to your system `python3` if it is empty (often `/usr/bin/python3`)
+3. Use KiCad's bundled Python on macOS, Windows and Linux AppImage installations.
+   For native Linux packages, select the system `python3` (often `/usr/bin/python3`).
 
 **Linux (Debian/Ubuntu) — one-time host packages**
 
@@ -72,7 +72,8 @@ Copy or symlink the **entire** repo folder into the KiCad **IPC** plugins direct
 …/plugins/kicad_library_manager/plugin.json
 ```
 
-KiCad IPC plugins directory (KiCad 9):
+KiCad IPC plugins directories below use KiCad 9. Replace `9.0` with `10.0` for
+KiCad 10:
 
 - **Linux**: `~/.local/share/kicad/9.0/plugins/`
 - **macOS**: `~/Documents/KiCad/9.0/plugins/`
@@ -102,10 +103,16 @@ Usually the plugin was found, but its Python environment failed to finish instal
 1. Confirm API is enabled (**Preferences → Plugins**).
 2. Confirm you are in the **PCB Editor** (not Schematic).
 3. Confirm install path contains `plugin.json` under `…/9.0/plugins/…` (not `scripting/plugins`).
-4. On Linux, run `sudo ./scripts/setup_linux.sh`, then:
+4. For native Linux packages, run `sudo ./scripts/setup_linux.sh`, then:
 
 ```bash
 ./scripts/repair_plugin_env.sh
+```
+
+For a KiCad 10 AppImage, use its bundled interpreter instead:
+
+```bash
+./scripts/repair_plugin_env.sh --major 10 --python /path/to/bundled/python3 --skip-system-deps
 ```
 
 5. Fully quit KiCad/PCB and reopen the PCB Editor.
@@ -270,7 +277,7 @@ This installs `unixodbc` + `libsqliteodbc` and registers the driver in `/etc/odb
 Run:
 
 ```bash
-./scripts/setup_odbc_macos.sh
+bash ./scripts/setup_odbc_macos.sh
 ```
 
 This installs the Homebrew `sqliteodbc` formula (which depends on `unixodbc`) and registers the driver name
@@ -284,7 +291,8 @@ This installs the Homebrew `sqliteodbc` formula (which depends on `unixodbc`) an
 ### 5b) Preview rendering dependencies (symbols / footprints)
 
 The plugin’s symbol/footprint previews render SVGs and then rasterize them for display.
-On some systems (especially macOS), you may need to install an SVG rasterizer.
+Bundled `wx.svg` handles this without an additional install. If it is unavailable,
+the plugin can use `rsvg-convert`, Inkscape or ImageMagick as described below.
 
 #### Linux
 
@@ -328,26 +336,22 @@ Install Inkscape and ensure `inkscape` is available on `PATH`, then restart KiCa
 - **Red**: remote out-of-date vs your local
 - **Gray**: unknown/stale (needs Fetch remote)
 
-### KiCad 10 port (based on 1.3.10; unreleased)
-
-This development branch includes release `v1.3.10` and the Unicode asset-status
-fix. Its internal version matches the released baseline; a new release version
-will be chosen when publishing a release. The initial local `0.8.0` plugin label
-was incorrect. `kicad-python==0.8.0` below is the separate Python API dependency.
+### KiCad 9 / 10 compatibility
 
 - Uses the existing IPC API, pinned to `kicad-python==0.8.0`; no SWIG dependency.
 - Selects the launching editor's config and matching CLI, follows nested library
   tables, and indexes packed or unpacked symbol libraries (including stock 10 symbols).
 - Preview metadata workers now accept successful subprocess results correctly.
-- Keep separate `XDG_CONFIG_HOME`, `XDG_CACHE_HOME`, `KICAD_CONFIG_HOME` and
-  `KICAD_DOCUMENTS_HOME` for a parallel trial installation. `KICAD_CLI` may point
-  to a matching-version wrapper. Do not point the trial at a production library checkout.
-- The examples above use 9.0; substitute 10.0 for a native KiCad 10 installation.
-  For AppImage, choose its bundled Python in KiCad's API settings, including the
-  matching wxPython. Repair accepts `--major 10 --python /path/to/python3.11
-  --skip-system-deps`; it respects `XDG_CACHE_HOME`.
-- Linux 9.0.9 and 10.0.7 discovery, metadata and company/stock SVG/raster previews
-  pass in isolated profiles. Windows/macOS and full request/DBL editor flows remain
-  qualification tasks. PCM compatibility is capped at 10.99 until 11 is tested.
+- KiCad 9 keeps its existing settings; KiCad 10 uses separate settings, pending
+  requests, caches and instance lock. Select the database checkout in Settings
+  when using a major for the first time. Database contents and formats are shared.
+- Non-ASCII asset filenames no longer appear modified merely because Git quotes
+  them differently. Request processing and footprint geometry calculations are unchanged.
+- Python 3.9 and later are supported, including KiCad's bundled Mac interpreter.
+  PCM compatibility is capped at 10.99 until KiCad 11 is qualified.
 
 Run `python3 -m unittest discover -s tests` for discovery/version regressions.
+Maintainers can build the same PCM payload used by release CI with
+`python3 scripts/build_package.py`; local builds are marked Testing. A version
+tag matching `library_manager.__version__` creates the stable release and updates
+the existing PCM feed after the change is merged into main.
