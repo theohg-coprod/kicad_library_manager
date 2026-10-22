@@ -42,7 +42,7 @@ def build(output: Path, *, status: str = 'testing', tag: str | None = None,
         'resources/icon.png': ((ROOT / 'pcm/icon.png').read_bytes(), 0o644),
     }
     files = [ROOT / name for name in (
-        'README.md', 'plugin.json', 'run_library_manager.py', 'requirements.txt', 'pcm/icon.png',
+        'README.md', 'CHANGELOG.md', 'plugin.json', 'run_library_manager.py', 'requirements.txt', 'pcm/icon.png',
     )]
     # Include nested scaffold .github/workflows: initialization needs these files.
     # Tests, release tooling and repository-level workflows are not plugin content.

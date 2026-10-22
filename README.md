@@ -2,6 +2,8 @@
 
 An IPC plugin for KiCad for managing local database (sqlite libraries) across many users with a nice UI.
 
+Version history: [CHANGELOG.md](CHANGELOG.md).
+
 - submit part/category requests via GitHub (`Requests/*.json`)
 - fetch/sync a local clone/submodule
 - browse/edit parts and browse symbols/footprints with previews
